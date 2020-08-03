@@ -11,3 +11,6 @@ from prepnet.normalize.standardize import Standardize
 
 from prepnet.impute.drop_na import DropNA
 from prepnet.impute.nan_imputer import NanImputer
+
+from prepnet.category.onehot_converter import OnehotConverter
+from prepnet.category.ordinal_converter import OrdinalConverter
