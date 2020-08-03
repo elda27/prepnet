@@ -20,7 +20,7 @@ setup(
     long_description=README,
     license='MIT Licences',
     url='https://github.com/elda27/prepnet',
-    maintainer='elda27',
+    author='elda27',
     # maintainer_email=None,
     platforms=['any'],
     install_requires=[
@@ -39,7 +39,9 @@ setup(
         'prepnet.executor',
         'prepnet.impute',
         'prepnet.normalize',
+        'prepnet.category',
     ],
+    zip_safe=False,
     python_requires='>=3.6',
     classifiers=[
         # (https://pypi.org/pypi?%3Aaction=list_classifiers)
