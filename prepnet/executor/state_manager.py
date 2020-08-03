@@ -1,14 +1,8 @@
-from enum import Enum, auto
 from dataclasses import dataclass
 from typing import Dict
+from prepnet.executor.state_value import StateValue
 
 class StateManager(dict):
-    class StateValue(Enum):
-        Prepared = auto()
-        Queued = auto()
-        Running = auto()
-        Finished = auto()
-
     @dataclass
     class State:
         status: StateValue

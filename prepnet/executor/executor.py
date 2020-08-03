@@ -1,17 +1,16 @@
-from prepnet.executor.state_manager import StateManager
+from prepnet.executor.state_value import StateValue
+from prepnet.executor.exec_mode import ExecMode
 from prepnet.core.column_converter_base import ColumnConverterBase
 import asyncio
 from enum import Enum
 import pandas as pd
 
 class Executor:
-    StateValue = StgateManager.StateValue
-
     def __init__(self, converters):
         self.status = StateManager(converters)
         self.converters = converters
 
-    async def exec_async(self, df: pd.DataFrame, mode: Mode=Mode.Encode ):
+    async def exec_async(self, df: pd.DataFrame, mode: ExecMode):
         generator_dict = {}
         for col, converter in self.converters.items():
             self.status.run(converter)
@@ -34,15 +33,15 @@ class Executor:
             if self.status.is_all_queued():
                 self.status.set_prepare()
 
-    def exec(self, df: pd.DataFrame, mode: Mode):
+    def exec(self, df: pd.DataFrame, mode: ExecMode):
         loop = asyncio.get_event_loop() if loop is None else loop
         return loop.run_until_complete(self.exec_async(df))
 
     def encode(self, df: pd.DataFrame):
-        return self.exec(df, Mode.Encode)
+        return self.exec(df, ExecMode.Encode)
 
     def decode(self, df: pd.DataFrame):
-        return self.exec(df, Mode.Decode)
+        return self.exec(df, ExecMode.Decode)
 
     def _assign(self, df, col, result):
         if isinstance(result, pd.DataFrame):

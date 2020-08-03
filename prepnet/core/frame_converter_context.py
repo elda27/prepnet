@@ -1,4 +1,4 @@
-from prepnet.executor.state_manager import StateManager
+from prepnet.executor.state_value import StateValue
 from prepnet.core.column_converter_base import ColumnConverterBase
 from prepnet.core.frame_converter_base import FrameConverterBase
 import pandas as pd
@@ -16,14 +16,14 @@ class FrameConverterContext(ColumnConverterBase):
     async def encode_async(self, xs: pd.Series):
         if self.origin in self.converters:
             self.converters[self.origin].queue(xs)
-        yield StateManager.StateValue.Queued
+        yield StateValue.Queued
         df = pd.DataFrame(self.queued)
         yield await self.origin.encode_async(df)
 
     async def decode_async(self, xs: pd.Series):
         if self.origin in self.converters:
             self.converters[self.origin].queue(xs)
-        yield StateManager.StateValue.Queued
+        yield StateValue.Queued
         df = pd.DataFrame(self.queued)
         yield await self.origin.decode_async(df)
 

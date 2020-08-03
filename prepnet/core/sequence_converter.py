@@ -1,5 +1,5 @@
 from prepnet.core.column_converter_base import ColumnConverterBase
-from prepnet.executor.state_manager import StateManager
+from prepnet.executor.state_value import StateValue
 from typing import List
 
 class SequenceConverter(ColumnConverterBase):
@@ -10,7 +10,7 @@ class SequenceConverter(ColumnConverterBase):
     async def encode_async(self, xs):
         for conv in self.converters:
             result = await conv.encode_async(xs)
-            if isinstance(result, StateManager.StateValue):
+            if isinstance(result, StateValue):
                 yield result
             else:
                 xs = result
@@ -19,7 +19,7 @@ class SequenceConverter(ColumnConverterBase):
     async def decode_async(self, ys):
         for conv in self.converters:
             result = await conv.decode_async(xs)
-            if isinstance(result, StateManager.StateValue):
+            if isinstance(result, StateValue):
                 yield result
             else:
                 xs = result
