@@ -1,6 +1,8 @@
 from prepnet.core.column_converter_base import ColumnConverterBase
 from prepnet.core.config import get_config
 
+import pandas as pd
+
 class QuantileNormalize(ColumnConverterBase):
     """N-percentile outlier will be removed
     """

@@ -1,6 +1,8 @@
 from prepnet.core.column_converter_base import ColumnConverterBase
 from prepnet.core.column_converter_base import ColumnConverterBase
 
+import pandas as pd
+
 class Standardize(ColumnConverterBase):
     """Standardize to N(0, 1)
     """
