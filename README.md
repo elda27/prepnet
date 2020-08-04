@@ -1,3 +1,5 @@
+***All implementation is not completed***
+
 # Prepnet
 Reconstructable preprocessor library.
 
