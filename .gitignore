@@ -4,3 +4,4 @@ dist
 prepnet.egg-info
 .vscode
 .pytest_cache
+.coverage
