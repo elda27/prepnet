@@ -21,6 +21,7 @@ setup(
     license='MIT Licences',
     url='https://github.com/elda27/prepnet',
     author='elda27',
+    maintainer='elda27',
     # maintainer_email=None,
     platforms=['any'],
     install_requires=[
@@ -60,6 +61,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Intended Audience :: Science/Research',
+        
     ],
     # keywords=None,
 )
