@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import pytest
 import pandas as pd
 import numpy as np
@@ -17,6 +19,29 @@ def test_ordinal_converter():
     reconstruct_series = converter.decode(output_series)
     pd.testing.assert_series_equal(reconstruct_series, input_series)
 
+def test_ordinal_converter_same_object():
+    input_df = pd.DataFrame({
+        'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
+        'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
+    })
+    expected_df = pd.DataFrame({
+        'col1': [1, 1, 0, 2, 2, 1],
+        'col2': [0, 1, 0, 2, 1, 2],
+    })
+
+    converter = OrdinalConverter()
+    converters = OrderedDict()
+    converters['col2'] = converter
+    converters['col1'] = converter
+
+    for col, converter in converters.items():
+        output_series = converter.encode(input_df[col])
+        pd.testing.assert_series_equal(
+            expected_df[col], output_series)
+        
+        reconstruct_series = converter.decode(output_series)
+        pd.testing.assert_series_equal(
+            reconstruct_series, input_df[col])
 
 def test_onehot_converter():
     input_df = pd.DataFrame({
