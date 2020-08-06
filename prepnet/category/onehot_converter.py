@@ -1,6 +1,8 @@
 from prepnet.core.config import get_config
 from prepnet.core.frame_converter_base import FrameConverterBase
 import pandas as pd
+import numpy as np
+
 
 class OnehotConverter(FrameConverterBase):
     def __init__(self):
@@ -17,14 +19,7 @@ class OnehotConverter(FrameConverterBase):
         result = {}
         for col in self.original_columns:
             filtered_columns = list(filter(lambda x: x.startswith(col), df.columns))
-            original_values = np.array([
-                original_col[len(col)+1:]
-                for original_col in filtered_columns
-            ]).astype(self.original_dtypes[col])
-            result[col] = df[filtered_columns].apply(
-                lambda xs: sum(i * x for i, x in enumerate(xs))
-            )
+            reconstructed = df[filtered_columns].idxmax(axis=1)
+            result[col] =  reconstructed.apply(lambda x: x[len(col) + 1:])
 
-        return pd.concat([
-            df, pd.DataFrame(result, index=df.index)
-        ], axis=1)
+        return pd.DataFrame(result, index=df.index)

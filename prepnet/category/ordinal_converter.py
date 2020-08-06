@@ -8,8 +8,10 @@ class OrdinalConverter(ColumnConverterBase):
         self.na_value = na_value
 
     def encode(self, xs:pd.Series):
-        self.codes, uniques = pd.factorize(xs, na_sentinel=self.na_value)
-        return pd.Series(self.codes, index=xs.index)
+        codes, self.uniques = pd.factorize(xs, na_sentinel=self.na_value)
+        return pd.Series(codes, index=xs.index)
 
     def decode(self, xs:pd.Series):
-        return self.codes.take(xs)
+        ys = pd.Series(self.uniques.take(xs))
+        ys.index = xs.index
+        return  ys
