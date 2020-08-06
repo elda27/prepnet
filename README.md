@@ -3,7 +3,7 @@
 # Prepnet
 Reconstructable preprocessor library.
 
-The concept of this project is to allow all preprocessing to be stored in a pickle.
+The concept of this libraru is to allow all preprocessing to be stored in a pickle.
 
 # Do you ever remember this?
 Boss: Hey, what's the difference between the new results and the old ones?
@@ -26,3 +26,8 @@ Boss: Hey you...
 
 # Example
 I'm writing...
+
+# Test
+```shell
+python -m pytest --cov=prepnet
+```
