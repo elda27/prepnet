@@ -32,11 +32,7 @@ class QuantileNormalize(ColumnConverterBase):
 
     def decode(self, xs:pd.Series)->pd.Series:
         if self.lower_mask is not None:
-            print('xs', xs, 'lo', self.lower_original_values)
             xs = xs.mask(self.lower_mask, other=self.lower_original_values)
-            print('ys', xs)
         if self.upper_mask is not None:
-            print('xs', xs, 'uo', self.upper_original_values)
             xs = xs.mask(self.upper_mask, other=self.upper_original_values)
-            print('ys', xs)
         return xs
