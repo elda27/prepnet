@@ -1,4 +1,7 @@
+import pandas as pd
+
 from prepnet.core.column_converter_base import ColumnConverterBase
+
 class NullConverter(ColumnConverterBase):
     """None conversion
     """
