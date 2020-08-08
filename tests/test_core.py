@@ -1,12 +1,14 @@
+from collections import OrderedDict
+
 import pytest
 import pandas as pd
 import numpy as np
 
 from prepnet.executor.executor import Executor
 
-from prepnet.category.onehot_converter import OnehotConverter
+from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.core.frame_converter_context import FrameConverterContext
-
+from prepnet.core.converter_reference import ConverterReference
 
 def test_executor():
     input_df = pd.DataFrame({
@@ -17,19 +19,19 @@ def test_executor():
         'col1': [1, 1, 0, 2, 2, 1],
         'col2': [0, 1, 0, 2, 1, 2],
     })
-    expected_series = pd.Series([0, 0, 1, 2, 1, 0])
-
-    
-
-    executor = Executor()
-    executor.encode()
 
     converter = OrdinalConverter()
-    output_series = converter.encode(input_series)
-    pd.testing.assert_series_equal(expected_series, output_series)
+    converters = OrderedDict()
+    converters['col2'] = converter
+    converters['col1'] = ConverterReference(converter)
 
-    reconstruct_series = converter.decode(output_series)
-    pd.testing.assert_series_equal(reconstruct_series, input_series)
+    executor = Executor(converters)
+    output_df = executor.encode(input_df)
+
+    pd.testing.assert_frame_equal(expected_df, output_df)
+
+    reconstruct_df = executor.decode(output_df)
+    pd.testing.assert_frame_equal(reconstruct_df, input_df)
 
 
 def test_frame_converter_context():
