@@ -29,7 +29,7 @@ class StateManager(dict):
     def is_prepared(self, converter):
         return self[converter].status == StateValue.Prepared
 
-    def queue(self, converter, ):
+    def queue(self, converter):
         self[converter].status = StateValue.Queued
 
     def is_queued(self, converter):
