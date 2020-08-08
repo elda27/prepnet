@@ -7,13 +7,13 @@ class StateManager(dict):
     class State:
         status: StateValue
         origin: object
-        column: str
+        columns: str
 
     def __init__(self, converters: Dict[str, object]):
-        super().__init__(State)
+        super().__init__()
         for key, converter in converters.items():
-            self[converter] = State(
-                state=StateValue.Prepared,
+            self[converter] = self.State(
+                status=StateValue.Prepared,
                 origin=converter.origin,
                 columns=key,
             )
@@ -48,8 +48,12 @@ class StateManager(dict):
     def is_finished(self, converter):
         return self[converter].status == StateValue.Running
 
+    def is_states(self, converter, values: StateValue):
+        return self[converter].status in values
+
     def is_all_finished(self):
-        return all([self[k] == StateValue.Finished for k in self.key()])
+        return all([self[k].status == StateValue.Finished for k in self.keys()])
 
     def is_all_queued(self):
-        return all([self[k] == StateValue.Queued for k in self.key()])
+        return all([self[k].status == StateValue.Queued for k in self.keys()])
+
