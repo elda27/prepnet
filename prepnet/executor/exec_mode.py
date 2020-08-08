@@ -1,5 +1,5 @@
-from enum import Enum
+from enum import Enum, auto
 
 class ExecMode(Enum):
-    EncodeAsync = 'encode_async'
-    DecodeAsync = 'decode_async'
+    EncodeAsync = auto()
+    DecodeAsync = auto()
