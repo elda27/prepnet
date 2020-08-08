@@ -5,7 +5,7 @@ import pandas as pd
 from typing import List, Dict
 
 class FrameConverterContext(ColumnConverterBase):
-    converters: Dict[FrameConverterBase, FrameConverterContext] = {}
+    converters: Dict[FrameConverterBase, "FrameConverterContext"] = {}
     def __init__(self, frame_converter: FrameConverterBase):
         super().__init__()
         self.origin: FrameConverterBase = frame_converter
