@@ -12,22 +12,32 @@ class FrameConverterContext(ColumnConverterBase):
         if self.origin not in self.converters:
             self.converters[frame_converter] = self
             self.queued: List[pd.Series] = []
+        else:
+            self.queued = None
 
     async def encode_async(self, xs: pd.Series):
         if self.origin in self.converters:
             self.converters[self.origin].queue(xs)
         yield StateValue.Queued
-        df = pd.concat(self.queued, axis=1)
-        async for i in self.origin.encode_async(df):
-            yield i
+
+        if self.queued is not None:
+            df = pd.concat(self.queued, axis=1)
+            async for i in self.origin.encode_async(df):
+                yield i
+        else:
+            yield StateValue.Finished
 
     async def decode_async(self, xs: pd.Series):
         if self.origin in self.converters:
             self.converters[self.origin].queue(xs)
         yield StateValue.Queued
-        df = pd.concat(self.queued, axis=1)
-        async for i in self.origin.decode_async(df):
-            yield i
+
+        if self.queued is not None:
+            df = pd.concat(self.queued, axis=1)
+            async for i in self.origin.decode_async(df):
+                yield i
+        else:
+            yield StateValue.Queued
 
 
     def encode(self, xs:pd.Series):
