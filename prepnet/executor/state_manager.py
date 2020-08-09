@@ -18,6 +18,9 @@ class StateManager(dict):
                 columns=key,
             )
 
+    def set_status(self, converter, status: StateValue):
+        self[converter].status = status
+
     def prepare(self, converter):
         state = self[converter]
         state.status = StateValue.Prepared
@@ -55,5 +58,8 @@ class StateManager(dict):
         return all([self[k].status == StateValue.Finished for k in self.keys()])
 
     def is_all_queued(self):
-        return all([self[k].status == StateValue.Queued for k in self.keys()])
+        return all([
+            self[k].status in (StateValue.Queued, StateValue.Finished) 
+            for k in self.keys()
+        ]) and any([self[k].status == StateValue.Queued for k in self.keys()])
 
