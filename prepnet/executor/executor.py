@@ -6,10 +6,11 @@ from prepnet.executor.state_value import StateValue
 from prepnet.executor.state_manager import StateManager
 from prepnet.executor.exec_mode import ExecMode
 from prepnet.core.column_converter_base import ColumnConverterBase
+from prepnet.core.sequence_converter import SequenceConverter
 
 import pandas as pd
 
-ConvertersAnnotation = Dict[str, Union[ColumnConverterBase, List[ColumnConverterBase]]]
+ConvertersAnnotation = Dict[str, ColumnConverterBase]
 
 class Executor:
     exec_mode_dict = {
@@ -18,8 +19,14 @@ class Executor:
     }
     def __init__(self, converters, loop=None):
         self.loop = asyncio.get_event_loop() if loop is None else loop
-        self.status: StateManager = StateManager(converters)
-        self.converters: ConvertersAnnotation = converters
+        self.converters = {}
+        for key, converter in converters.items():
+            if isinstance(converter, list):
+                self.converters[key] = SequenceConverter(converter)
+            else:
+                self.converters[key] = converter 
+
+        self.status: StateManager = StateManager(self.converters)
         self.column_converter = {}
 
     async def exec_async(self, df: pd.DataFrame, mode: ExecMode):
@@ -38,7 +45,12 @@ class Executor:
                 if not self.status.is_states(converter, (StateValue.Running, StateValue.Prepared)):
                     continue
                 self.status.run(converter)
-                result = await generator.__anext__()
+                try:
+                    result = await generator.__anext__()
+                except:
+                    self.status.finish(converter)
+                    continue
+
                 if isinstance(result, (pd.DataFrame, pd.Series)):
                     if mode == ExecMode.DecodeAsync:
                         src_col = self.column_converter.get(col, col)
@@ -54,7 +66,7 @@ class Executor:
                         result
                     )
                 elif isinstance(result, StateValue):
-                    self.status.queue(converter)
+                    self.status.set_status(converter, result)
                 else:
                     raise ValueError(f'Yield unsupported value type: {type(result)}')
 
