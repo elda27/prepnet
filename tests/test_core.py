@@ -7,6 +7,7 @@ import numpy as np
 from prepnet.executor.executor import Executor
 
 from prepnet.core.null_converter import NullConverter
+from prepnet.core.sequence_converter import SequenceConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.core.frame_converter_context import FrameConverterContext
@@ -36,6 +37,33 @@ def test_executor():
     pd.testing.assert_frame_equal(reconstruct_df, input_df)
 
 
+def test_null_converter():
+    input_series = pd.Series([1,2,3,4,5,6,7])
+
+    converter = NullConverter()
+    output_series = converter.encode(input_series)
+    pd.testing.assert_series_equal(input_series, output_series)
+
+    reconstruct_series = converter.decode(output_series)
+
+    pd.testing.assert_series_equal(input_series, reconstruct_series)
+
+
+def test_sequence_converter():
+    input_series = pd.Series([1,2,3,4,5,6,7])
+
+    converter = SequenceConverter([
+        NullConverter(),
+        NullConverter(),
+    ])
+    output_series = converter.encode(input_series)
+    pd.testing.assert_series_equal(input_series, output_series)
+
+    reconstruct_series = converter.decode(output_series)
+
+    pd.testing.assert_series_equal(input_series, reconstruct_series)
+
+
 def test_partial_convert_using_frame_converter_context():
     input_df = pd.DataFrame({
         'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
@@ -58,16 +86,4 @@ def test_partial_convert_using_frame_converter_context():
 
     reconstruct_df = executor.decode(output_df)
     pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
-
-
-def test_null_converter():
-    input_series = pd.Series([1,2,3,4,5,6,7])
-
-    converter = NullConverter()
-    output_series = converter.encode(input_series)
-    pd.testing.assert_series_equal(input_series, output_series)
-
-    reconstruct_series = converter.decode(output_series)
-
-    pd.testing.assert_series_equal(input_series, reconstruct_series)
 
