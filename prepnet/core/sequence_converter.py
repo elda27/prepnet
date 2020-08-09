@@ -9,20 +9,20 @@ class SequenceConverter(ColumnConverterBase):
 
     async def encode_async(self, xs):
         for conv in self.converters:
-            result = await conv.encode_async(xs)
-            if isinstance(result, StateValue):
-                yield result
-            else:
-                xs = result
+            async for result in conv.encode_async(xs):
+                if isinstance(result, StateValue):
+                    yield result
+                else:
+                    xs = result
         yield xs
 
     async def decode_async(self, ys):
         for conv in self.converters:
-            result = await conv.decode_async(xs)
-            if isinstance(result, StateValue):
-                yield result
-            else:
-                xs = result
+            async for result in conv.decode_async(xs):
+                if isinstance(result, StateValue):
+                    yield result
+                else:
+                    xs = result
         yield xs
 
     def encode(self, xs):
@@ -30,7 +30,7 @@ class SequenceConverter(ColumnConverterBase):
             xs = conv.encode(xs)
         return xs
 
-    def decode(self, ys):
+    def decode(self, xs):
         for conv in reversed(self.converters):
             xs = conv.decode(xs)
         return xs
