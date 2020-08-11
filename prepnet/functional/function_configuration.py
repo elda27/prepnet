@@ -13,24 +13,45 @@ class FunctionConfiguration:
         self.converter_klass = klass
         self.columns = columns
 
-    def create(self):
-        if self.converter_klass is ColumnConverterBase:
+    def create_frame_converter(self):
+        if self.columns is None:
+            return self.converter_klass(
+                *self.args, **self.kwargs
+            )
+        else:
+            converter = self.converter_klass(
+                *self.args, **self.kwargs
+            )
+            return {
+                col: FrameConverterContext(converter) 
+                for col in self.columns
+            }
+
+    def create_column_converter(self):
+        if isinstance(self.columns, str):
+            return {
+                self.columns: self.converter_klass(
+                    *self.args, **self.kwargs
+                )
+            }
+        else:
             return {
                 col: self.converter_klass(
                     *self.args, **self.kwargs
                 ) for col in self.columns
             }
-        elif self.converter_klass is FrameConverterBase:
-            if self.columns is None:
-                return self.converter_klass(
-                    *self.args, **self.kwargs
-                )
-            else:
-                return {
-                    col: self.converter_klass(
-                        *self.args, **self.kwargs
-                    ) for col in self.columns
-                }
+
+    def create(self):
+        if issubclass(self.converter_klass, FrameConverterBase):
+            return self.create_frame_converter()
+        elif issubclass(self.converter_klass, ColumnConverterBase):
+            return self.create_column_converter()
+        else:
+            raise TypeError(
+                'Converter class should derrive ColumnConverterBase: ' + 
+                str(type(self.converter_klass))
+            )
+
     def clone(self):
         return FunctionConfiguration(
             self.columns, self.converter_klass,

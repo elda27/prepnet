@@ -2,6 +2,8 @@ from contextlib import contextmanager
 from typing import Any, List
 from copy import deepcopy
 
+import pandas as pd
+
 from prepnet.executor.executor import Executor
 from prepnet.functional.fixed_stage import FixedStage
 from prepnet.functional.configuration_context import ConfigurationContext
@@ -29,44 +31,48 @@ class FunctionalContext:
         self.stage_converters = None
 
     @contextmanager
-    def enter(self, stage:Any=None)->FunctionalContext:
-        if stage is None:
-            stage = self.stage_index
-            self.stage_index += 1
+    def enter(self, stage_name:str=None)->"FunctionalContext":
         old_stage_name = self.stage_name
         old_stage = self.current_stage_contexts 
+        
+        if stage_name is None:
+            self.stage_name = str(self.stage_index)
+            self.stage_index += 1
+        else:
+            self.stage_name = stage_name
+        self.current_stage_contexts  = []
         
         try:
             yield self
         finally:
+            configs = []
+            for context in self.current_stage_contexts:
+                configs.extend(context.to_config())
             self.stages.append(
-                FixedStage(
-                    self.stage_name,
-                    [context.to_config() for context in self.current_stage_contexts]
-                )
+                FixedStage(self.stage_name,configs)
             )
             self.stage_name = old_stage_name
             self.current_stage_contexts = old_stage
 
-    def __getitem__(self, *keys):
-        context = ConfigurationContext(keys)
+    def __getitem__(self, *keys)->ConfigurationContext:
+        context = ConfigurationContext(keys[0])
         self.current_stage_contexts.append(context)
         return context
 
-    def __getattribute__(self, name):
+    def __getattr__(self, name):
         context = ConfigurationContext(None)
         self.current_stage_contexts.append(context)
         return getattr(context, name)
     
     def create_converters(self):
-        self.stage_converters = [
-            stage.create_converter()
+        return [
+            stage.create_converters()
             for stage in self.stages
             if stage.enable
         ]
 
     def encode(self, df: pd.DataFrame):
-        if self.converters is None:
+        if self.stage_converters is None:
             self.stage_converters = self.create_converters()
 
         for converters in self.stage_converters:

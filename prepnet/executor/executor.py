@@ -47,7 +47,7 @@ class Executor:
                 self.status.run(converter)
                 try:
                     result = await generator.__anext__()
-                except:
+                except StopAsyncIteration:
                     self.status.finish(converter)
                     continue
 
