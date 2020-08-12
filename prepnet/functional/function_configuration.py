@@ -1,7 +1,6 @@
 from typing import List
 
 from prepnet.core.frame_converter_base import FrameConverterBase
-from prepnet.core.frame_converter_context import FrameConverterContext
 from prepnet.core.column_converter_base import ColumnConverterBase
 
 class FunctionConfiguration:
@@ -14,18 +13,9 @@ class FunctionConfiguration:
         self.columns = columns
 
     def create_frame_converter(self):
-        if self.columns is None:
-            return self.converter_klass(
-                *self.args, **self.kwargs
-            )
-        else:
-            converter = self.converter_klass(
-                *self.args, **self.kwargs
-            )
-            return {
-                col: FrameConverterContext(converter) 
-                for col in self.columns
-            }
+        return self.converter_klass(
+            *self.args, **self.kwargs
+        )
 
     def create_column_converter(self):
         if isinstance(self.columns, str):

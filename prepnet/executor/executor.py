@@ -1,90 +1,41 @@
 import asyncio
-from typing import Dict, Union, List
-from enum import Enum
+from typing import Any, List
+from enum import Enum, auto
 
-from prepnet.executor.state_value import StateValue
-from prepnet.executor.state_manager import StateManager
-from prepnet.executor.exec_mode import ExecMode
+from prepnet.core.frame_converter_base import FrameConverterBase
 from prepnet.core.column_converter_base import ColumnConverterBase
-from prepnet.core.sequence_converter import SequenceConverter
+
+from prepnet.executor.column_executor import ColumnExecutor
+from prepnet.executor.frame_executor import FrameExecutor
+from prepnet.executor.executor_base import ExecutorBase
+
+from prepnet.functional.converter_array import ConverterArray
 
 import pandas as pd
 
-ConvertersAnnotation = Dict[str, ColumnConverterBase]
+class Executor(ExecutorBase):
+    class Executors(Enum):
+        ColumnExecutor = auto()
+        FrameExecutor = auto()
 
-class Executor:
-    exec_mode_dict = {
-        ExecMode.DecodeAsync: 'decode_async',
-        ExecMode.EncodeAsync: 'encode_async',
-    }
-    def __init__(self, converters, loop=None):
-        self.loop = asyncio.get_event_loop() if loop is None else loop
-        self.converters = {}
-        for key, converter in converters.items():
-            if isinstance(converter, list):
-                self.converters[key] = SequenceConverter(converter)
-            else:
-                self.converters[key] = converter 
+    def __init__(self, converters: Any, columns:List[str]=None):
+        self.converters = converters
+        self.columns = columns
 
-        self.status: StateManager = StateManager(self.converters)
-        self.column_converter = {}
-
-    async def exec_async(self, df: pd.DataFrame, mode: ExecMode):
-        generator_dict = {}
-        for col, converter in self.converters.items():
-            self.status.run(converter)
-            if mode == ExecMode.DecodeAsync:
-                input_df = df[self.column_converter.get(col, col)]
-            else:
-                input_df = df[col]
-            generator = getattr(converter, self.exec_mode_dict[mode])(input_df)
-            generator_dict[col] = (converter, generator)
-
-        while not self.status.is_all_finished():
-            for col, (converter, generator) in generator_dict.items():
-                if not self.status.is_states(converter, (StateValue.Running, StateValue.Prepared)):
-                    continue
-                self.status.run(converter)
-                try:
-                    result = await generator.__anext__()
-                except StopAsyncIteration:
-                    self.status.finish(converter)
-                    continue
-
-                if isinstance(result, (pd.DataFrame, pd.Series)):
-                    if mode == ExecMode.DecodeAsync:
-                        src_col = self.column_converter.get(col, col)
-                    else:
-                        if isinstance(result, pd.Series):
-                            self.column_converter[col] = result.name
-                        else:
-                            self.column_converter[col] = result.columns
-                        src_col = col
-                    self.status.finish(converter)
-                    df = self._assign(
-                        df, src_col,
-                        result
-                    )
-                elif isinstance(result, StateValue):
-                    self.status.set_status(converter, result)
-                else:
-                    raise ValueError(f'Yield unsupported value type: {type(result)}')
-
-            if self.status.is_all_queued():
-                self.status.set_prepare()
-        return df
-
-    def exec(self, df: pd.DataFrame, mode: ExecMode):
-        return self.loop.run_until_complete(self.exec_async(df, mode))
+        self.executor_type = self.validate_converters(converters)
+        if self.executor_type == self.Executors.ColumnExecutor:
+            self.impl = ColumnExecutor(converters)
+        elif self.executor_type == self.Executors.FrameExecutor:
+            self.impl = FrameExecutor(converters, columns=converters.columns)
 
     def encode(self, df: pd.DataFrame):
-        return self.exec(df, ExecMode.EncodeAsync)
+        return self.impl.encode(df)
 
     def decode(self, df: pd.DataFrame):
-        return self.exec(df, ExecMode.DecodeAsync)
+        return self.impl.decode(df)
 
-    def _assign(self, df, col, result):
-        if isinstance(result, pd.DataFrame):
-            return pd.concat([df.drop(columns=col), result], axis=1)
+    def validate_converters(self, converters):
+        if isinstance(converters, ConverterArray) and issubclass(type(converters[0]), FrameConverterBase):
+            return Executor.Executors.FrameExecutor
         else:
-            return df.assign(**{col:result})
+            return Executor.Executors.ColumnExecutor

@@ -4,6 +4,7 @@ from collections import defaultdict
 import pandas as pd
 
 from prepnet.functional.function_configuration import FunctionConfiguration
+from prepnet.functional.converter_array import ConverterArray
 from prepnet.executor.executor import Executor
 
 class FixedStage:
@@ -18,18 +19,22 @@ class FixedStage:
 
     def create_converters(self):
         all_converters = defaultdict(list)
-        all_converters_array = []
+        all_converters_array = None
         for config in self.stage_configurations:
             converters = config.create()
             if isinstance(converters, dict):
                 for col, converter in converters.items():
                     all_converters[col].append(converter)
             else:
+                if all_converters_array is None:
+                    all_converters_array = ConverterArray(config.columns)
                 all_converters_array.append(converters)
-        assert not (len(all_converters) > 0 and len(all_converters_array) > 0), \
+        assert len(all_converters) == 0 or all_converters_array is None, \
             'All converter should only be FrameConverter or ColumnConverter.'
-
-        return all_converters
+        if all_converters_array is not None:
+            return all_converters_array
+        else:
+            return all_converters
 
     def disable(self):
         stage = self.clone()
