@@ -10,7 +10,6 @@ from prepnet.core.null_converter import NullConverter
 from prepnet.core.sequence_converter import SequenceConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.category.onehot_converter import OnehotConverter
-from prepnet.core.frame_converter_context import FrameConverterContext
 from prepnet.core.converter_reference import ConverterReference
 
 def test_executor():
@@ -62,58 +61,4 @@ def test_sequence_converter():
     reconstruct_series = converter.decode(output_series)
 
     pd.testing.assert_series_equal(input_series, reconstruct_series)
-
-
-def test_partial_convert_using_frame_converter_context():
-    input_df = pd.DataFrame({
-        'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
-        'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
-    })
-    expected_df = pd.DataFrame({
-        'col1_one': [1, 1, 0, 0, 0, 1],
-        'col1_two': [0, 0, 1, 0, 0, 0],
-        'col1_three': [0, 0, 0, 1, 1, 0],
-        'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
-    }, dtype=np.uint8)
-    converter = FrameConverterContext(OnehotConverter())
-    
-    executor = Executor({
-        'col1': converter
-    })
-    output_df = executor.encode(input_df)
-
-    pd.testing.assert_frame_equal(expected_df, output_df[expected_df.columns])
-
-    reconstruct_df = executor.decode(output_df)
-    pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
-
-
-def test_functional_context2():
-    input_df = pd.DataFrame({
-        'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
-        'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
-        'col3': ['two', 'one', 'three', 'one', 'two', 'two'],
-    })
-    expected_df = pd.DataFrame({
-        'col1_one': [1, 1, 0, 0, 0, 1],
-        'col1_two': [0, 0, 1, 0, 0, 0],
-        'col1_three': [0, 0, 0, 1, 1, 0],
-        'col2_one': [0, 1, 0, 0, 1, 0],
-        'col2_two': [1, 0, 1, 0, 0, 0],
-        'col2_three': [0, 0, 0, 1, 0, 1],
-        'col3': [0, 1, 2, 1, 0, 0],
-    }, dtype=np.int64)
-    
-    onehot = OnehotConverter()
-    executor = Executor({
-        'col1': FrameConverterContext(onehot),
-        'col2': FrameConverterContext(onehot),
-        'col3': OrdinalConverter(),
-    })
-    output_df = executor.encode(input_df)
-
-    pd.testing.assert_frame_equal(expected_df, output_df[expected_df.columns].astype(np.int64))
-
-    reconstruct_df = executor.decode(output_df)
-    pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
 

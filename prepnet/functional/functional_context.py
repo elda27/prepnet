@@ -28,7 +28,8 @@ class FunctionalContext:
         self.stage_name: str = '0'
         self.current_stage_contexts: List[ConfigurationContext] = []
         self.stage_index:int = 1
-        self.stage_converters = None
+        self.stage_executors = None
+        self.result_columns = None
 
     @contextmanager
     def enter(self, stage_name:str=None)->"FunctionalContext":
@@ -72,15 +73,20 @@ class FunctionalContext:
         ]
 
     def encode(self, df: pd.DataFrame):
-        if self.stage_converters is None:
-            self.stage_converters = self.create_converters()
+        if self.stage_executors is None:
+            self.stage_executors = []
+            stage_converters = self.create_converters()
+            for converters in stage_converters:
+                self.stage_executors.append(Executor(converters))
 
-        for converters in self.stage_converters:
-            df = Executor(converters).encode(df)
+        for executor in self.stage_executors:
+            df = executor.encode(df)
+        self.result_columns = df.columns
         return df
 
     def decode(self, df: pd.DataFrame):
-        assert self.stage_converters is not None
-        for converters in reversed(self.stage_converters):
-            df = Executor(converters).encode(df)
+        assert self.stage_executors is not None
+        result_columns = self.result_columns
+        for executor in reversed(self.stage_executors):
+            df = executor.decode(df)
         return df

@@ -26,11 +26,12 @@ def test_functional_context():
     
     context = FunctionalContext()
     with context.enter():
-        c1 = context['col1', 'col2'].onehot()
-        c2 = context['col3'].ordinal()
+        context['col1', 'col2'].onehot()
+    with context.enter():
+        context['col3'].ordinal()
 
     output_df = context.encode(input_df)
-    pd.testing.assert_frame_equal(expected_df, output_df[expected_df.columns])
+    pd.testing.assert_frame_equal(expected_df, output_df[expected_df.columns].astype(np.uint8))
 
     reconstruct_df = context.decode(output_df)
     pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
