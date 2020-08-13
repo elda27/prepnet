@@ -1,4 +1,6 @@
-***All implementation is not completed***
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![Build Status](https://travis-ci.org/elda27/prepnet.svg?branch=master)](https://travis-ci.org/elda27/prepnet)
+[![codecov](https://codecov.io/gh/elda27/prepnet/branch/master/graph/badge.svg)](https://codecov.io/gh/elda27/prepnet)
 
 # Prepnet
 Reconstructable preprocessor library.
