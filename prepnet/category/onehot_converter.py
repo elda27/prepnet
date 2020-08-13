@@ -7,12 +7,14 @@ import numpy as np
 class OnehotConverter(FrameConverterBase):
     def __init__(self):
         super().__init__()
-        self.mask = None
+        self.result_columns = None
 
     def encode(self, df:pd.DataFrame):
         self.original_columns = df.columns
         self.original_dtypes = df.dtypes
         result = pd.get_dummies(df)
+        assert result_columns is None or result_columns == df.columns
+        self.result_columns = result.columns
         return result
 
     def decode(self, df:pd.DataFrame):
