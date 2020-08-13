@@ -9,12 +9,20 @@ class QuantileNormalize(ColumnConverterBase):
     def __init__(self, percentile=0.99):
         super().__init__()
         self.percentile = percentile
+        self.upper = None
+        self.lower = None
         self.lower_mask = None
         self.upper_mask = None
 
     def encode(self, xs:pd.Series)->pd.Series:
-        upper = xs.quantile(self.percentile)
-        lower = xs.quantile(1.0 - self.percentile)
+        if self.upper is None:
+            upper = xs.quantile(self.percentile)
+            lower = xs.quantile(1.0 - self.percentile)
+            self.upper = upper
+            self.lower = lower
+        else:
+            upper = self.upper
+            lower = self.lower
 
         upper_mask = xs > upper
         lower_mask = xs < lower
