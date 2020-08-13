@@ -5,7 +5,7 @@
 # Prepnet
 Reconstructable preprocessor library.
 
-The concept of this libraru is to allow all preprocessing to be stored in a pickle.
+The concept of this library is to be able to save pre-processes as a pickle.
 
 # Do you ever remember this?
 Boss: Hey, what's the difference between the new results and the old ones?
