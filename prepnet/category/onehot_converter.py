@@ -13,7 +13,9 @@ class OnehotConverter(FrameConverterBase):
         self.original_columns = df.columns
         self.original_dtypes = df.dtypes
         result = pd.get_dummies(df)
-        assert result_columns is None or result_columns == df.columns
+        
+        assert self.result_columns is None or (self.result_columns == df.columns).all()
+
         self.result_columns = result.columns
         return result
 
