@@ -22,13 +22,13 @@ class ConfigurationContext(FrameContext):
         return self
 
     @copydoc(Standardize)
-    def standardize(self, percentile:float=0.99):
-        self.add_config(Standardize, percentile)
+    def standardize(self):
+        self.add_config(Standardize)
         return self
 
     @copydoc(QuantileNormalize)
-    def quantile_normalize(self):
-        self.add_config(QuantileNormalize)
+    def quantile_normalize(self, percentile:float=0.99):
+        self.add_config(QuantileNormalize, percentile)
         return self
 
     @copydoc(NanImputer)

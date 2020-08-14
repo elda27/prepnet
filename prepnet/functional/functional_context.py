@@ -74,7 +74,7 @@ class FunctionalContext:
     
     @property
     def post(self):
-        context = FrameContext(self)
+        context = FrameContext(None)
         self.post_stage_context = context
         return context
 
@@ -94,22 +94,24 @@ class FunctionalContext:
 
         for executor in self.stage_executors:
             df = executor.encode(df)
-            
-        if self.post_executor is not None:
-            converters = FixedStage(
-                'post-process', self.post_stage_context.to_config()
-            ).create_converters()
-            if len(converters) == 0:
-                converters.append(NullConverter())
-            self.post_executor = Executor(converters)
-
-
+        
+        if self.post_stage_context is not None:
+            if self.post_executor is None:
+                converters = FixedStage(
+                    'post-process', self.post_stage_context.to_config()
+                ).create_converters()
+                if len(converters) == 0:
+                    converters.append(NullConverter())
+                self.post_executor = Executor(converters)
+            df = self.post_executor.encode(df)
         self.result_columns = df.columns
         return df
 
     def decode(self, df: pd.DataFrame):
         assert self.stage_executors is not None
         result_columns = self.result_columns
+        if self.post_executor is not None:
+            df = self.post_executor.decode(df)
         for executor in reversed(self.stage_executors):
             df = executor.decode(df)
         return df
