@@ -1,32 +1,37 @@
 from typing import Dict, List
 
+from prepnet.core.module import copydoc
+from prepnet.functional.frame_context import FrameContext
+
 from prepnet.functional.function_configuration import FunctionConfiguration
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
+from prepnet.normalize.quantile_normalize import QuantileNormalize
+from prepnet.normalize.standardize import Standardize
+from prepnet.impute.nan_imputer import NanImputer
 
-class ConfigurationContext:
-    def __init__(self, columns: List[str]):
-        self.columns: List[str] = columns
-        self.converters = []
-
-    def to_config(self)->List[FunctionConfiguration]:
-        configs = []
-        for klass, args, kwargs in self.converters:
-            configs.append(
-                FunctionConfiguration(
-                    self.columns, klass,
-                    args, kwargs
-                )
-            )
-        return configs
-
-    def add_config(self, klass, *args, **kwargs):
-        self.converters.append((klass, args, kwargs))
-
+class ConfigurationContext(FrameContext):
+    @copydoc(OnehotConverter)
     def onehot(self):
         self.add_config(OnehotConverter)
         return self
 
+    @copydoc(OrdinalConverter)
     def ordinal(self):
         self.add_config(OrdinalConverter)
+        return self
+
+    @copydoc(Standardize)
+    def standardize(self, percentile:float=0.99):
+        self.add_config(Standardize, percentile)
+        return self
+
+    @copydoc(QuantileNormalize)
+    def quantile_normalize(self):
+        self.add_config(QuantileNormalize)
+        return self
+
+    @copydoc(NanImputer)
+    def nan_impute(self):
+        self.add_config(NanImputer)
         return self

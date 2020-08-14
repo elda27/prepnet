@@ -7,6 +7,8 @@ import pandas as pd
 from prepnet.executor.executor import Executor
 from prepnet.functional.fixed_stage import FixedStage
 from prepnet.functional.configuration_context import ConfigurationContext
+from prepnet.functional.frame_context import FrameContext
+from prepnet.core.null_converter import NullConverter
 
 class FunctionalContext:
     """Functional style preprocess
@@ -25,10 +27,15 @@ class FunctionalContext:
     """
     def __init__(self):
         self.stages: List[FixedStage] = []
+        
         self.stage_name: str = '0'
-        self.current_stage_contexts: List[ConfigurationContext] = []
         self.stage_index:int = 1
+        
+        self.current_stage_contexts: List[ConfigurationContext] = []
+        self.post_stage_context: FrameContext = None
+
         self.stage_executors = None
+        self.post_executor = None
         self.result_columns = None
 
     @contextmanager
@@ -65,6 +72,12 @@ class FunctionalContext:
         self.current_stage_contexts.append(context)
         return getattr(context, name)
     
+    @property
+    def post(self):
+        context = FrameContext(self)
+        self.post_stage_context = context
+        return context
+
     def create_converters(self):
         return [
             stage.create_converters()
@@ -81,6 +94,16 @@ class FunctionalContext:
 
         for executor in self.stage_executors:
             df = executor.encode(df)
+            
+        if self.post_executor is not None:
+            converters = FixedStage(
+                'post-process', self.post_stage_context.to_config()
+            ).create_converters()
+            if len(converters) == 0:
+                converters.append(NullConverter())
+            self.post_executor = Executor(converters)
+
+
         self.result_columns = df.columns
         return df
 
