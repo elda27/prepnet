@@ -41,6 +41,7 @@ setup(
         'prepnet.impute',
         'prepnet.normalize',
         'prepnet.category',
+        'prepnet.functional',
     ],
     zip_safe=False,
     python_requires='>=3.6',

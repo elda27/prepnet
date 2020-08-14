@@ -14,3 +14,5 @@ from prepnet.impute.nan_imputer import NanImputer
 
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
+
+from prepnet.functional.functional_context import FunctionalContext
