@@ -1,8 +1,8 @@
 from prepnet.core.config import get_config
-from prepnet.core.frame_converter_base import FrameConverterBase
+from prepnet.core.column_converter_base import ColumnConverterBase
 import pandas as pd
 
-class NanImputer(FrameConverterBase):
+class NanImputer(ColumnConverterBase):
     """NaN filled by value.
     """
     def __init__(self, value:float=0.0):

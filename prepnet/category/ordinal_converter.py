@@ -3,7 +3,12 @@ from prepnet.core.column_converter_base import ColumnConverterBase
 import pandas as pd
 
 class OrdinalConverter(ColumnConverterBase):
-    def __init__(self, na_value=-1):
+    def __init__(self, na_value:int=-1):
+        """Ordinal transform for categorical data.
+
+        Args:
+            na_value (int, optional): NaN or NA value will assign this value. Defaults to -1.
+        """
         super().__init__()
         self.na_value = na_value
         self.uniques = None
