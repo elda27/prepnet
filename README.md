@@ -33,6 +33,7 @@ with context.enter('normalize'):
     ].standardize()
 context.post.split(5)
 
+# convert python list object from prepnet.DataFrameArray
 preprocessed_df_list = list(context.encode(df))
 # Concat first 4 element for train dataset
 train_df = pd.concat(preprocessed_df_list[:4], axis=0) 
