@@ -10,7 +10,7 @@ from prepnet.normalize.quantile_normalize import QuantileNormalize
 from prepnet.normalize.standardize import Standardize
 
 from prepnet.impute.drop_na import DropNA
-from prepnet.impute.nan_imputer import NanImputer
+from prepnet.impute.fill_na import FillNA
 
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
