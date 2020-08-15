@@ -17,27 +17,29 @@ There is pre-process using prepnet for iris dataset in a part of example.
 import prepnet 
 from sklearn import datasets
 
-# Load dataset
+# Load dataset.
 iris = datasets.load_iris()
 df = pd.DataFrame(iris.data, columns=iris.feature_names)
 df['target'] = iris.target_names[iris.target]
 
-# Scale by std and mean, and split 5 folds
+# Scale by std and mean, and split 5 folds.
 context = prepnet.FunctionalContext()
 with context.enter('normalize'):
+    # All pre-process method allow method chain.
     context[
         'sepal length (cm)',
         'sepal width (cm)',
         'petal length (cm)',
         'petal width (cm)',
     ].standardize()
+# context.post is execute always after other preprocesses.
 context.post.split(5)
 
-# convert python list object from prepnet.DataFrameArray
+# convert python list object from prepnet.DataFrameArray.
 preprocessed_df_list = list(context.encode(df))
-# Concat first 4 element for train dataset
+# Concat first 4 element for train dataset.
 train_df = pd.concat(preprocessed_df_list[:4], axis=0) 
-# Use last element for test dataset
+# Use last element for test dataset.
 test_df = preprocessed_df_list[-1]
 ```
 
