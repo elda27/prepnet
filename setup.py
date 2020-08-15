@@ -22,8 +22,7 @@ setup(
     license='MIT Licences',
     url='https://github.com/elda27/prepnet',
     author='elda27',
-    maintainer='elda27',
-    # maintainer_email=None,
+    author_email='elda27.prog@gmail.com',
     platforms=['any'],
     install_requires=[
         "numpy",

@@ -75,6 +75,14 @@ Boss: Hey you...
 
 # Install
 ```shell
+pip install prepnet
+```
+
+or
+
+```shell
+git clone https://github.com/elda27/prepnet
+cd prepnet
 python setup.py install
 ```
 
