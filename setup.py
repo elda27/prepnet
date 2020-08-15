@@ -42,6 +42,7 @@ setup(
         'prepnet.normalize',
         'prepnet.category',
         'prepnet.functional',
+        'prepnet.math',
         'prepnet.extra',
     ],
     zip_safe=False,
