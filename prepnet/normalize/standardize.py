@@ -4,9 +4,9 @@ from prepnet.core.column_converter_base import ColumnConverterBase
 import pandas as pd
 
 class Standardize(ColumnConverterBase):
-    """Standardize to N(0, 1)
-    """
     def __init__(self):
+        """Standardize to standard normal distribution.
+        """
         super().__init__()
         self.mean = None
         self.std = None

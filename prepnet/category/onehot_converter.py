@@ -6,6 +6,10 @@ import numpy as np
 
 class OnehotConverter(FrameConverterBase):
     def __init__(self):
+        """Onehot encoding for categorical columns.
+
+        You cannot combined with the class derrived ColumnConverterBase
+        """
         super().__init__()
         self.result_columns = None
 

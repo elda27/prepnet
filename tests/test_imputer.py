@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from prepnet.impute.nan_imputer import NanImputer
+from prepnet.impute.fill_na import FillNA
 from prepnet.impute.drop_na import DropNA
 
 
@@ -25,7 +25,7 @@ def test_nan_imputer(input, expected, impute_value):
     input_df = pd.DataFrame(input).astype(float)
     output_df = pd.DataFrame(expected).astype(float)
 
-    imputer = NanImputer(impute_value)
+    imputer = FillNA(impute_value)
     result_df = imputer.encode(input_df)
     pd.testing.assert_frame_equal(output_df, result_df)
     

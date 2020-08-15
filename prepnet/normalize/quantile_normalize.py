@@ -4,9 +4,12 @@ from prepnet.core.config import get_config
 import pandas as pd
 
 class QuantileNormalize(ColumnConverterBase):
-    """N-percentile outlier will be removed
-    """
     def __init__(self, percentile=0.99):
+        """Outlier removal using n-th percentile .
+
+        Args:
+            percentile (float, optional): [description]. Defaults to 0.99.
+        """
         super().__init__()
         self.percentile = percentile
         self.upper = None

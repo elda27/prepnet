@@ -21,6 +21,7 @@ class Executor(ExecutorBase):
     def __init__(self, converters: Any, columns:List[str]=None):
         self.converters = converters
         self.columns = columns
+        self.enable = True
 
         self.executor_type = self.validate_converters(converters)
         if self.executor_type == self.Executors.ColumnExecutor:
@@ -29,10 +30,16 @@ class Executor(ExecutorBase):
             self.impl = FrameExecutor(converters, columns=converters.columns)
 
     def encode(self, df: pd.DataFrame):
-        return self.impl.encode(df)
+        if self.enable:
+            return self.impl.encode(df)
+        else:
+            return df
 
     def decode(self, df: pd.DataFrame):
-        return self.impl.decode(df)
+        if self.enable:
+            return self.impl.decode(df)
+        else:
+            return df
 
     def validate_converters(self, converters):
         if isinstance(converters, ConverterArray) and issubclass(type(converters[0]), FrameConverterBase):
