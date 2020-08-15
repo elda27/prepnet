@@ -18,6 +18,7 @@ setup(
     version=__version__,
     description='Reconstructable preprocessor library',
     long_description=README,
+    long_description_content_type='text/markdown',
     license='MIT Licences',
     url='https://github.com/elda27/prepnet',
     author='elda27',
