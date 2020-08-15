@@ -21,6 +21,8 @@ class FixedStage:
         all_converters = defaultdict(list)
         all_converters_array = None
         for config in self.stage_configurations:
+            if not                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           self.enable:
+                continue
             converters = config.create()
             if isinstance(converters, dict):
                 for col, converter in converters.items():
@@ -42,9 +44,12 @@ class FixedStage:
         return stage
 
     def clone(self):
-        stage = FixedStage(self.stage_name, enable=self.enable)
-        stage.stage_configurations = [
-            config.clone()
-            for config in self.stage_configurations
-        ]
+        stage = FixedStage(
+            self.stage_name,
+            [
+                config.clone()
+                for config in self.stage_configurations
+            ],
+            enable=self.enable,
+        )
         return stage

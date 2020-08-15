@@ -32,11 +32,13 @@ class FunctionalContext:
         self.stage_index:int = 1
         
         self.current_stage_contexts: List[ConfigurationContext] = []
-        self.post_stage_context: FrameContext = None
 
         self.stage_executors = None
-        self.post_executor = None
         self.result_columns = None
+
+        self.post_stage_context: FrameContext = None
+        self.post_stage_status: bool = True
+        self.post_executor = None
 
     @contextmanager
     def enter(self, stage_name:str=None)->"FunctionalContext":
@@ -62,8 +64,10 @@ class FunctionalContext:
             self.stage_name = old_stage_name
             self.current_stage_contexts = old_stage
 
-    def __getitem__(self, *keys)->ConfigurationContext:
-        context = ConfigurationContext(keys[0])
+    def __getitem__(self, keys)->ConfigurationContext:
+        if not isinstance(keys, tuple):
+            keys = (keys, )
+        context = ConfigurationContext(keys)
         self.current_stage_contexts.append(context)
         return context
 
@@ -85,23 +89,46 @@ class FunctionalContext:
             if stage.enable
         ]
 
+    def disable(self, *keys)->"FunctionalContext":
+        obj = self.clone()
+        obj.stages = [
+            stage.disable() if stage.stage_name in keys else stage
+            for stage in obj.stages
+        ]
+        if 'post-process' in keys: # Post process
+            obj.post_stage_status = False
+        return obj
+
+    def clone(self)->"FunctionalContext":
+        context = FunctionalContext()
+        context.stages = [
+            stage.clone() for stage in self.stages
+        ]
+        
+        context.stage_name = self.stage_name
+        context.stage_index = self.stage_index
+        
+        context.post_stage_context = self.post_stage_context
+        context.post_stage_status = self.post_stage_status
+
+        return context
+
     def encode(self, df: pd.DataFrame):
         if self.stage_executors is None:
             self.stage_executors = []
             stage_converters = self.create_converters()
-            for converters in stage_converters:
+            for converters in stage_converters: # Create executor
                 self.stage_executors.append(Executor(converters))
 
         for executor in self.stage_executors:
             df = executor.encode(df)
-        
+
         if self.post_stage_context is not None:
-            if self.post_executor is None:
+            if self.post_executor is None: # Create executor
                 converters = FixedStage(
-                    'post-process', self.post_stage_context.to_config()
+                    'post-process', self.post_stage_context.to_config(),
+                    enable=self.post_stage_status,
                 ).create_converters()
-                if len(converters) == 0:
-                    converters.append(NullConverter())
                 self.post_executor = Executor(converters)
             df = self.post_executor.encode(df)
         self.result_columns = df.columns
