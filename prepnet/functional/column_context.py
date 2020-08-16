@@ -32,6 +32,11 @@ class ColumnContext(ConfigurationContextBase):
         self.add_config(Standardize)
         return self
 
+    @copydoc(Standardize)
+    def minmax_rescale(self):
+        self.add_config(Standardize)
+        return self
+
     @copydoc(QuantileRound)
     def quantile_round(self, percentile:float=0.99):
         self.add_config(QuantileRound, percentile)
