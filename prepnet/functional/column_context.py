@@ -6,6 +6,7 @@ from prepnet.functional.configuration_context_base import ConfigurationContextBa
 from prepnet.functional.function_configuration import FunctionConfiguration
 
 from prepnet.core.lambda_converter import LambdaConverter
+from prepnet.core.astype_converter import AsTypeConverter
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.normalize.quantile_normalize import QuantileNormalize
@@ -13,6 +14,7 @@ from prepnet.normalize.standardize import Standardize
 from prepnet.math.exp_transform import ExpTransform
 from prepnet.math.log_transform import LogTransform
 from prepnet.impute.fill_na import FillNA
+from prepnet.time.frequency_time import FrequencyTimeConverter
 
 class ColumnContext(ConfigurationContextBase):
     @copydoc(OnehotConverter)
@@ -55,3 +57,12 @@ class ColumnContext(ConfigurationContextBase):
         self.add_config(LogTransform, interception)
         return self
 
+    @copydoc(AsTypeConverter)
+    def astype(self, dtype):
+        self.add_config(AsTypeConverter, dtype)
+        return self
+
+    @copydoc(FrequencyTimeConverter)
+    def datetime_to_index(self, start=None, end=None, periods=None, freq=None, tz=None, normalize=False, name=None, closed=None):
+        self.add_config(FrequencyTimeConverter, start, end, periods, freq, tz, normalize, name, closed)
+        return self
