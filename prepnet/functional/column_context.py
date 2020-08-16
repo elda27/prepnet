@@ -51,7 +51,7 @@ class ColumnContext(ConfigurationContextBase):
         return self
 
     @copydoc(LogTransform)
-    def exp(self, interception: float=1.0):
+    def log(self, interception: float=1.0):
         self.add_config(LogTransform, interception)
         return self
 
