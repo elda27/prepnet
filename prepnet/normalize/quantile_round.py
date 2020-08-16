@@ -3,7 +3,7 @@ from prepnet.core.config import get_config
 
 import pandas as pd
 
-class QuantileNormalize(ColumnConverterBase):
+class QuantileRound(ColumnConverterBase):
     def __init__(self, percentile=0.99):
         """Outlier removal using n-th percentile .
 

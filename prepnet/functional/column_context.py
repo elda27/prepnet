@@ -9,7 +9,7 @@ from prepnet.core.lambda_converter import LambdaConverter
 from prepnet.core.astype_converter import AsTypeConverter
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
-from prepnet.normalize.quantile_normalize import QuantileNormalize
+from prepnet.normalize.quantile_round import QuantileRound
 from prepnet.normalize.standardize import Standardize
 from prepnet.math.exp_transform import ExpTransform
 from prepnet.math.log_transform import LogTransform
@@ -32,9 +32,9 @@ class ColumnContext(ConfigurationContextBase):
         self.add_config(Standardize)
         return self
 
-    @copydoc(QuantileNormalize)
-    def quantile_normalize(self, percentile:float=0.99):
-        self.add_config(QuantileNormalize, percentile)
+    @copydoc(QuantileRound)
+    def quantile_round(self, percentile:float=0.99):
+        self.add_config(QuantileRound, percentile)
         return self
 
     @copydoc(FillNA)

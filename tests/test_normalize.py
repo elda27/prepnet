@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from prepnet.normalize.quantile_normalize import QuantileNormalize
+from prepnet.normalize.quantile_round import QuantileRound
 from prepnet.normalize.standardize import Standardize
 
 @pytest.mark.parametrize(('input', 'expected', 'quantile'), [
@@ -16,7 +16,7 @@ def test_quantile_normalize(input, expected, quantile):
     input_series = pd.Series(input)
     expected_series = pd.Series(expected)
 
-    converter = QuantileNormalize(quantile)
+    converter = QuantileRound(quantile)
     output_series = converter.encode(input_series)
     pd.testing.assert_series_equal(expected_series, output_series)
 
