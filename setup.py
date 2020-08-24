@@ -44,6 +44,7 @@ setup(
         'prepnet.functional',
         'prepnet.math',
         'prepnet.extra',
+        'prepnet.time',
     ],
     zip_safe=False,
     python_requires='>=3.6',

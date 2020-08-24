@@ -33,7 +33,7 @@ class ColumnContext(ConfigurationContextBase):
         return self
 
     @copydoc(Standardize)
-    def minmax_rescale(self):
+    def rescale_variance(self):
         self.add_config(Standardize)
         return self
 
