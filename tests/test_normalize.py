@@ -12,7 +12,7 @@ from prepnet.normalize.standardize import Standardize
         0.8
     )
 ])
-def test_quantile_normalize(input, expected, quantile):
+def test_quantile_round(input, expected, quantile):
     input_series = pd.Series(input)
     expected_series = pd.Series(expected)
 

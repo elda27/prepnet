@@ -6,7 +6,7 @@ from prepnet.core.frame_converter_base import FrameConverterBase
 from prepnet.core.sequence_converter import SequenceConverter
 
 from prepnet.executor.executor import Executor
-from prepnet.normalize.quantile_normalize import QuantileNormalize
+from prepnet.normalize.quantile_round import QuantileRound
 from prepnet.normalize.standardize import Standardize
 
 from prepnet.impute.drop_na import DropNA
