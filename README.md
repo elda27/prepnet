@@ -32,8 +32,10 @@ with context.enter('normalize'):
         'petal length (cm)',
         'petal width (cm)',
     ].standardize()
+
 # context.post is execute always after other preprocesses.
-context.post.split(5)
+with context.enter('post'):
+    context.split()
 
 # convert python list object from prepnet.DataFrameArray.
 preprocessed_df_list = list(context.encode(df))
