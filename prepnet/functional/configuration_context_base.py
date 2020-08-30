@@ -1,21 +1,20 @@
+from copy import deepcopy
 from typing import Dict, List
-from prepnet.functional.function_configuration import FunctionConfiguration
+from prepnet.executor.converter_array import ConverterArray
 
 class ConfigurationContextBase:
     def __init__(self, columns: List[str]):
         self.columns: List[str] = columns
         self.converters = []
 
-    def to_config(self)->List[FunctionConfiguration]:
-        configs = []
+    def to_converter_array(self)->ConverterArray:
+        converters = ConverterArray(self.columns)
         for klass, args, kwargs in self.converters:
-            configs.append(
-                FunctionConfiguration(
-                    self.columns, klass,
-                    args, kwargs
-                )
-            )
-        return configs
+            converters.append(klass(*args, **kwargs))
+        return converters
+
+    def clone(self):
+        return deepcopy(self)
 
     def add_config(self, klass, *args, **kwargs):
         """Add converter
