@@ -24,15 +24,15 @@ class FrameExecutor(ExecutorBase):
             out_df = SequenceConverter(self.converters).encode(in_df)
 
         # Modify columns
-        if (len(out_df.columns) != len(self.converters.columns) or 
-                (out_df.columns != self.converters.columns).all()):
-            df = df.drop(columns=self.converters.columns)
 
         self.result_columns = out_df.columns
         if self.converters.columns is None:
             # Modify index
             df = out_df
         else:
+            if (len(out_df.columns) != len(self.converters.columns) or 
+                    (out_df.columns != self.converters.columns).all()):
+                df = df.drop(columns=self.converters.columns)
             if (out_df.index == in_df.index).all():
                 df = df.assign(**{
                     col:series for col, series in out_df.items()

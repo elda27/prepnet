@@ -87,3 +87,30 @@ def test_disable_execution():
         result_reconstruct_df[input_df.columns], 
         input_df
     )
+
+def test_context_all_columns():
+    input_df = pd.DataFrame({
+        'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
+        'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
+    })
+    expected_df = pd.DataFrame({
+        'col1_one': [1, 1, 0, 0, 0, 1],
+        'col1_two': [0, 0, 1, 0, 0, 0],
+        'col1_three': [0, 0, 0, 1, 1, 0],
+        'col2_one': [0, 1, 0, 0, 1, 0],
+        'col2_two': [1, 0, 1, 0, 0, 0],
+        'col2_three': [0, 0, 0, 1, 0, 1],
+    }, dtype=np.uint8)
+    
+    context = FunctionalContext()
+    with context.enter():
+        context.onehot()
+
+    output_df = context.encode(input_df)
+    pd.testing.assert_frame_equal(
+        expected_df.astype(np.uint8), 
+        output_df[expected_df.columns].astype(np.uint8)
+    )
+
+    reconstruct_df = context.decode(output_df)
+    pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
