@@ -4,7 +4,7 @@ import numpy as np
 from prepnet.core.config import get_config
 from prepnet.core.column_converter_base import ColumnConverterBase
 
-class FrequencyTimeConverter(ColumnConverterBase):
+class DateToIndex(ColumnConverterBase):
     def __init__(self, start=None, end=None, periods=None, freq=None, tz=None, normalize=False, name=None, closed=None):
         """datetime to index of time period or frequency.
             All arguments passed pandas.
@@ -56,6 +56,7 @@ class FrequencyTimeConverter(ColumnConverterBase):
         )
         for i, (start, end) in enumerate(zip(self.date_range, self.date_range[1:])):
             result[xs.between(start, end)] = i
+        result[xs >= end] = i + 1
         if get_config('keep_original'):
             self.original_xs = xs
         return result
