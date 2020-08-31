@@ -3,40 +3,26 @@ from collections import defaultdict
 
 import pandas as pd
 
-from prepnet.functional.function_configuration import FunctionConfiguration
-from prepnet.functional.converter_array import ConverterArray
+# from prepnet.functional.function_configuration import FunctionConfiguration
+from prepnet.functional.configuration_context_base import ConfigurationContextBase
+from prepnet.executor.converter_array import ConverterArray
 from prepnet.executor.executor import Executor
 
 class FixedStage:
     def __init__(
         self, stage_name:str, 
-        configs:List[FunctionConfiguration], 
+        configs:List[ConfigurationContextBase], 
         enable:bool=True
     ):
         self.stage_name = stage_name
-        self.stage_configurations:List[FunctionConfiguration] = configs
+        self.stage_configurations:List[ConfigurationContextBase] = configs
         self.enable = enable
 
     def create_converters(self):
-        all_converters = defaultdict(list)
-        all_converters_array = None
-        for config in self.stage_configurations:
-            if not                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           self.enable:
-                continue
-            converters = config.create()
-            if isinstance(converters, dict):
-                for col, converter in converters.items():
-                    all_converters[col].append(converter)
-            else:
-                if all_converters_array is None:
-                    all_converters_array = ConverterArray(config.columns)
-                all_converters_array.append(converters)
-        assert len(all_converters) == 0 or all_converters_array is None, \
-            'All converter should only be FrameConverter or ColumnConverter.'
-        if all_converters_array is not None:
-            return all_converters_array
-        else:
-            return all_converters
+        return [
+            context.to_converter_array()
+            for context in self.stage_configurations
+        ]
 
     def disable(self):
         stage = self.clone()

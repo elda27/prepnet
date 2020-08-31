@@ -36,10 +36,6 @@ class FunctionalContext:
         self.stage_executors = None
         self.result_columns = None
 
-        self.post_stage_context: FrameContext = None
-        self.post_stage_status: bool = True
-        self.post_executor = None
-
     @contextmanager
     def enter(self, stage_name:str=None)->"FunctionalContext":
         old_stage_name = self.stage_name
@@ -55,18 +51,20 @@ class FunctionalContext:
         try:
             yield self
         finally:
-            configs = []
-            for context in self.current_stage_contexts:
-                configs.extend(context.to_config())
             self.stages.append(
-                FixedStage(self.stage_name,configs)
+                FixedStage(
+                    self.stage_name, 
+                    [context for context in self.current_stage_contexts]
+                )
             )
             self.stage_name = old_stage_name
             self.current_stage_contexts = old_stage
 
     def __getitem__(self, keys)->ConfigurationContext:
-        if not isinstance(keys, tuple):
-            keys = (keys, )
+        if isinstance(keys, tuple):
+            keys = list(keys)
+        elif isinstance(keys, str):
+            keys = [keys]
         context = ConfigurationContext(keys)
         self.current_stage_contexts.append(context)
         return context
@@ -76,11 +74,6 @@ class FunctionalContext:
         self.current_stage_contexts.append(context)
         return getattr(context, name)
     
-    @property
-    def post(self):
-        context = FrameContext(None)
-        self.post_stage_context = context
-        return context
 
     def create_converters(self):
         return [
@@ -95,8 +88,7 @@ class FunctionalContext:
             stage.disable() if stage.stage_name in keys else stage
             for stage in obj.stages
         ]
-        if 'post-process' in keys: # Post process
-            obj.post_stage_status = False
+        
         return obj
 
     def clone(self)->"FunctionalContext":
@@ -108,9 +100,6 @@ class FunctionalContext:
         context.stage_name = self.stage_name
         context.stage_index = self.stage_index
         
-        context.post_stage_context = self.post_stage_context
-        context.post_stage_status = self.post_stage_status
-
         return context
 
     def encode(self, df: pd.DataFrame):
@@ -122,23 +111,12 @@ class FunctionalContext:
 
         for executor in self.stage_executors:
             df = executor.encode(df)
-
-        if self.post_stage_context is not None:
-            if self.post_executor is None: # Create executor
-                converters = FixedStage(
-                    'post-process', self.post_stage_context.to_config(),
-                    enable=self.post_stage_status,
-                ).create_converters()
-                self.post_executor = Executor(converters)
-            df = self.post_executor.encode(df)
         self.result_columns = df.columns
         return df
 
     def decode(self, df: pd.DataFrame):
         assert self.stage_executors is not None
         result_columns = self.result_columns
-        if self.post_executor is not None:
-            df = self.post_executor.decode(df)
         for executor in reversed(self.stage_executors):
             df = executor.decode(df)
         return df

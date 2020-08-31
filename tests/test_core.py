@@ -1,16 +1,14 @@
-from collections import OrderedDict
-
 import pytest
 import pandas as pd
 import numpy as np
 
 from prepnet.executor.executor import Executor
 
+from prepnet.executor.converter_array import ConverterArray
 from prepnet.core.null_converter import NullConverter
 from prepnet.core.sequence_converter import SequenceConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.category.onehot_converter import OnehotConverter
-from prepnet.core.converter_reference import ConverterReference
 
 def test_executor():
     input_df = pd.DataFrame({
@@ -18,16 +16,14 @@ def test_executor():
         'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
     })
     expected_df = pd.DataFrame({
-        'col1': [1, 1, 0, 2, 2, 1],
+        'col1': [0, 0, 1, 2, 2, 0],
         'col2': [0, 1, 0, 2, 1, 2],
     })
 
-    converter = OrdinalConverter()
-    converters = OrderedDict()
-    converters['col2'] = converter
-    converters['col1'] = ConverterReference(converter)
+    converters = ConverterArray(['col1', 'col2'])
+    converters.append(OrdinalConverter())
 
-    executor = Executor(converters)
+    executor = Executor([converters])
     output_df = executor.encode(input_df)
 
     pd.testing.assert_frame_equal(expected_df, output_df)

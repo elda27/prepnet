@@ -9,7 +9,7 @@ from prepnet.executor.column_executor import ColumnExecutor
 from prepnet.executor.frame_executor import FrameExecutor
 from prepnet.executor.executor_base import ExecutorBase
 
-from prepnet.functional.converter_array import ConverterArray
+from prepnet.executor.converter_array import ConverterArray
 
 import pandas as pd
 
@@ -18,28 +18,32 @@ class Executor(ExecutorBase):
         ColumnExecutor = auto()
         FrameExecutor = auto()
 
-    def __init__(self, converters: Any, columns:List[str]=None):
+    def __init__(self, converters: List[ConverterArray]):
         self.converters = converters
-        self.columns = columns
         self.enable = True
 
-        self.executor_type = self.validate_converters(converters)
-        if self.executor_type == self.Executors.ColumnExecutor:
-            self.impl = ColumnExecutor(converters)
-        elif self.executor_type == self.Executors.FrameExecutor:
-            self.impl = FrameExecutor(converters, columns=converters.columns)
+        self.executors = []
+        for converter_array in converters:
+            self.executor_type = self.validate_converters(converter_array)
+            if self.executor_type == self.Executors.ColumnExecutor:
+                impl = ColumnExecutor(converter_array)
+            elif self.executor_type == self.Executors.FrameExecutor:
+                impl = FrameExecutor(converter_array)
+            self.executors.append(impl)
 
     def encode(self, df: pd.DataFrame):
-        if self.enable:
-            return self.impl.encode(df)
-        else:
+        if not self.enable:
             return df
+        for executor in self.executors:
+            df = executor.encode(df)
+        return df
 
     def decode(self, df: pd.DataFrame):
-        if self.enable:
-            return self.impl.decode(df)
-        else:
+        if not self.enable:
             return df
+        for executor in self.executors:
+            df = executor.decode(df)
+        return df
 
     def validate_converters(self, converters):
         if isinstance(converters, ConverterArray) and issubclass(type(converters[0]), FrameConverterBase):

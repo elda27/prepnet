@@ -1,52 +1,68 @@
 from prepnet.executor.executor_base import ExecutorBase
 from prepnet.core.frame_converter_base import FrameConverterBase
+from prepnet.executor.converter_array import ConverterArray
 from prepnet.core.dataframe_array import DataFrameArray
+from prepnet.core.sequence_converter import SequenceConverter
 from typing import List, Dict
 
 import pandas as pd
 
 class FrameExecutor(ExecutorBase):
-    def __init__(self, converters:List[FrameConverterBase], columns: List[str]=None):
-        if columns is not None:
-            self.columns = list(columns) 
-        else:
-            self.columns = None
-        self.result_columns = None
+    def __init__(self, converters:ConverterArray):
         self.converters = converters
+        self.result_columns = None
 
     def encode(self, df: pd.DataFrame):
-        if self.columns is None:
-            self.columns = df.columns
-            input_df = None
+        if self.converters.columns is None:
+            in_df = df
         else:
-            input_df = df.drop(columns=self.columns)
-            df = df[self.columns]
-        for converter in self.converters:
-            df = converter.encode(df)
-        if self.result_columns is None:
-            self.result_columns = df.columns
-        
-        if input_df is None:
-            return df
-        else:
-            return pd.concat([input_df, df], axis=1)
+            in_df = df[self.converters.columns]
 
-    def decode(self, df: pd.DataFrame):
-        assert self.result_columns is not None
-        input_df = df.drop(columns=self.result_columns)
-        df = df[self.result_columns]
-        for converter in self.converters:
-            df = converter.decode(df)
-        if isinstance(input_df, DataFrameArray):
-            if isinstance(df, DataFrameArray):
-                return DataFrameArray(
-                    pd.concat(i, d) for i, d in zip(input_df, df)
-                )
-            elif all(input_df._apply(lambda x: x.empty)):
-                return df
+        if isinstance(in_df, DataFrameArray):
+            out_df = in_df.apply(lambda x: SequenceConverter(self.converters).encode(in_df))
+        else:
+            out_df = SequenceConverter(self.converters).encode(in_df)
+
+        # Modify columns
+
+        self.result_columns = out_df.columns
+        if self.converters.columns is None:
+            # Modify index
+            df = out_df
+        else:
+            if (len(out_df.columns) != len(self.converters.columns) or 
+                    (out_df.columns != self.converters.columns).all()):
+                df = df.drop(columns=self.converters.columns)
+            if (out_df.index == in_df.index).all():
+                df = df.assign(**{
+                    col:series for col, series in out_df.items()
+                })
             else:
                 raise ValueError(
-                    'Unexpected decoding due to type mismatch or shape mismatch.\n'
+                    'Index is unmatched while column wise encoding.\n'
+                    'If you want to modify the index, the columns should be None.\n'
+                    f'Columns: {self.converters.columns}, Converter: {self.converters}'
                 )
+
+        return df
+
+    def decode(self, df: pd.DataFrame):
+        if self.converters.columns is None:
+            in_df = df
         else:
-            return pd.concat([input_df, df], axis=1)
+            in_df = df[self.result_columns]
+            df = df.drop(columns=self.result_columns)
+
+        if isinstance(in_df, DataFrameArray):
+            out_df = in_df.apply(lambda x: SequenceConverter(self.converters).decode(x))
+        else:
+            out_df = SequenceConverter(self.converters).decode(in_df)
+
+        if self.converters.columns is None:
+            df = out_df
+        else:
+            df = pd.concat([df, out_df], axis=1)
+
+        return df
+
+

@@ -18,9 +18,9 @@ class DataFrameArray(list):
         return super().__getitem__(*keys)
 
     def _apply(self, method, *args, **kwargs):
-        return [
+        return DataFrameArray([
             method(df, *args, **kwargs) for df in self
-        ]
+        ])
 
     @property
     def index(self):
