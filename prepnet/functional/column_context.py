@@ -14,7 +14,8 @@ from prepnet.normalize.standardize import Standardize
 from prepnet.math.exp_transform import ExpTransform
 from prepnet.math.log_transform import LogTransform
 from prepnet.impute.fill_na import FillNA
-from prepnet.time.date_to_index import DateToIndex
+from prepnet.time.daterange_to_index import DateRangeToIndex
+from prepnet.time.datefreq_to_index import DateFreqToIndex
 
 class ColumnContext(ConfigurationContextBase):
     @copydoc(OnehotConverter)
@@ -67,7 +68,12 @@ class ColumnContext(ConfigurationContextBase):
         self.add_config(AsTypeConverter, dtype)
         return self
 
-    @copydoc(DateToIndex)
-    def date_to_index(self, start=None, end=None, periods=None, freq=None, tz=None, normalize=False, name=None, closed=None):
-        self.add_config(DateToIndex, start, end, periods, freq, tz, normalize, name, closed)
+    @copydoc(DateRangeToIndex)
+    def daterange_to_index(self, start=None, end=None, periods=None, freq=None, tz=None, normalize=False, name=None, closed=None):
+        self.add_config(DateRangeToIndex, start, end, periods, freq, tz, normalize, name, closed)
+        return self
+
+    @copydoc(DateFreqToIndex)
+    def datefreq_to_index(self, freq_rule, period_rule, start):
+        self.add_config(DateFreqToIndex, freq_rule, period_rule, start)
         return self
