@@ -16,7 +16,7 @@ class PandasAccessor:
     """Preprocess by pandas accessor such as "dt", "str" and so on.
     """
     def __init__(self, accessor: str):
-        """Accessor name of string
+        """adding converter by 
 
         Args:
             accessor (str): Accessor name

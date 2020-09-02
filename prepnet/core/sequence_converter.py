@@ -38,7 +38,11 @@ class SequenceConverter(ColumnConverterBase):
 
     def exec_frame_wise(self, convert_method, xs):
         if isinstance(xs, pd.Series):
-            return convert_method(pd.DataFrame(xs))[xs.name]
+            result = convert_method(pd.DataFrame(xs))[
+                xs.name if xs.name is not None else 0
+            ]
+            result.name = xs.name
+            return result
         elif isinstance(xs, pd.DataFrame):
             return convert_method(xs)
         else:

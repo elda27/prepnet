@@ -56,15 +56,15 @@ def test_disable_execution():
 
     context = FunctionalContext()
     with context.enter():
-        context['col'].convert_lambda(
+        context['col'].lambda_column(
             plus, minus
         )
     with context.enter('minus'):
-        context['col'].convert_lambda(
+        context['col'].lambda_column(
             minus, plus
         )
     with context.enter():
-        context['col'].convert_lambda(
+        context['col'].lambda_column(
             plus, minus
         )
     original_output_df = context.encode(input_df)
