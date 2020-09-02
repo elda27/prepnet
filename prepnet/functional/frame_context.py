@@ -5,7 +5,7 @@ from prepnet.functional.configuration_context_base import ConfigurationContextBa
 
 from prepnet.functional.function_configuration import FunctionConfiguration
 
-from prepnet.core.lambda_converter import LambdaConverter
+from prepnet.core.lambda_converter import LambdaFrameConverter
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.impute.drop_na import DropNA
 from prepnet.extra.split_converter import SplitConverter
@@ -26,7 +26,7 @@ class FrameContext(ConfigurationContextBase):
         self.add_config(SplitConverter, n_split, shuffle)
         return self
 
-    @copydoc(LambdaConverter)
-    def lambda_converter(self, encode, decode):
-        self.add_config(LambdaConverter, encode, decode)
+    @copydoc(LambdaFrameConverter)
+    def lambda_frame(self, encode, decode):
+        self.add_config(LambdaFrameConverter, encode, decode)
         return self

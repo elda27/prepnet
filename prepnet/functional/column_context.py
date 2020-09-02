@@ -5,7 +5,7 @@ from prepnet.functional.configuration_context_base import ConfigurationContextBa
 
 from prepnet.functional.function_configuration import FunctionConfiguration
 
-from prepnet.core.lambda_converter import LambdaConverter
+from prepnet.core.lambda_converter import LambdaColumnConverter
 from prepnet.core.astype_converter import AsTypeConverter
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
@@ -48,9 +48,9 @@ class ColumnContext(ConfigurationContextBase):
         self.add_config(FillNA, value, by)
         return self
 
-    @copydoc(LambdaConverter)
-    def convert_lambda(self, encode, decode):
-        self.add_config(LambdaConverter, encode, decode)
+    @copydoc(LambdaColumnConverter)
+    def lambda_column(self, encode, decode):
+        self.add_config(LambdaColumnConverter, encode, decode)
         return self
 
     @copydoc(ExpTransform)
