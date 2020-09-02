@@ -50,13 +50,14 @@ class DateRangeToIndex(ColumnConverterBase):
                 self.normalize, closed=self.closed
             )
         
-        result = pd.Series(
-            np.digitize(xs, self.date_range),
-            index=xs.index, name=xs.name
-        )
-        # for i, (start, end) in enumerate(zip(self.date_range, self.date_range[1:])):
-        #     result[xs.between(start, end)] = i
-        # result[xs >= end] = i + 1
+        # result = pd.Series(
+        #     np.digitize(xs, self.date_range),
+        #     index=xs.index, name=xs.name
+        # )
+        result = pd.Series(np.zeros_like(xs, dtype=int))
+        for i, (start, end) in enumerate(zip(self.date_range, self.date_range[1:])):
+            result[xs.between(start, end)] = i
+        result[xs >= end] = i + 1
         if get_config('keep_original'):
             self.original_xs = xs
         return result
