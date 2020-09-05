@@ -4,6 +4,7 @@ import numpy as np
 
 from prepnet.normalize.quantile_round import QuantileRound
 from prepnet.normalize.standardize import Standardize
+from prepnet.normalize.percentile_converter import PercentileConverter
 
 @pytest.mark.parametrize(('input', 'expected', 'quantile'), [
     (
@@ -42,3 +43,17 @@ def test_standardise(mu, sigma):
     reconstruct_mu = np.mean(reconstruct_series)
     reconstruct_sigma = np.std(reconstruct_series)
     assert reconstruct_mu == pytest.approx(mu, rel=1e-1) and reconstruct_sigma == pytest.approx(sigma, rel=1e-1)
+
+def test_to_percentile():
+    converter = PercentileConverter()
+    input_series = pd.Series(np.arange(10))
+    expected_series = pd.Series(np.linspace(0.0, 1.0, 10))
+
+    output_series = converter.encode(input_series)
+    pd.testing.assert_series_equal(
+        expected_series, output_series, 
+        check_exact=False, atol=1e-3
+    )
+
+    reconstruct_series = converter.decode(output_series)
+    pd.testing.assert_series_equal(input_series, reconstruct_series)
