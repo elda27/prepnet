@@ -10,7 +10,9 @@ from prepnet.core.astype_converter import AsTypeConverter
 from prepnet.category.onehot_converter import OnehotConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.normalize.quantile_round import QuantileRound
+from prepnet.normalize.percentile_converter import PercentileConverter
 from prepnet.normalize.standardize import Standardize
+from prepnet.normalize.rescale import Rescale
 from prepnet.math.exp_transform import ExpTransform
 from prepnet.math.log_transform import LogTransform
 from prepnet.impute.fill_na import FillNA
@@ -38,9 +40,19 @@ class ColumnContext(ConfigurationContextBase):
         self.add_config(Standardize)
         return self
 
+    @copydoc(Standardize)
+    def rescale(self, lower:float=None, upper:float=None, dst_min:float=0.0, dst_max:float=1.0):
+        self.add_config(Rescale, lower, upper, dst_min, dst_max)
+        return self
+
     @copydoc(QuantileRound)
     def quantile_round(self, percentile:float=0.99):
         self.add_config(QuantileRound, percentile)
+        return self
+
+    @copydoc(PercentileConverter)
+    def to_percentile(self):
+        self.add_config(PercentileConverter)
         return self
 
     @copydoc(FillNA)

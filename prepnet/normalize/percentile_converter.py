@@ -7,6 +7,23 @@ import pandas as pd
 class PercentileConverter(ColumnConverterBase):
     def __init__(self):
         """Normalize by qunatile value
+        
+        Examples:
+        >>> input_series = pd.Series(np.arange(10)).sample(frac=1)
+        >>> input_series.to_list()
+        [0, 2, 7, 8, 6, 4, 1, 9, 5, 3]
+        >>> PercentileConverter().encode()
+        [0.0,
+         0.2222222222222222,
+         0.7777777777777778,
+         0.8888888888888888,
+         0.6666666666666666,
+         0.4444444444444444,
+         0.1111111111111111,
+         1.0,
+         0.5555555555555556,
+         0.3333333333333333
+        ]
         """
 
         super().__init__()
