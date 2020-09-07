@@ -82,14 +82,19 @@ class FunctionalContext:
             if stage.enable
         ]
 
-    def disable(self, *keys)->"FunctionalContext":
+    def set_state(self, flag, *keys)->"FunctionalContext":
         obj = self.clone()
         obj.stages = [
-            stage.disable() if stage.stage_name in keys else stage
+            stage.set_state(flag) if stage.stage_name in keys else stage
             for stage in obj.stages
         ]
-        
         return obj
+
+    def disable(self, *keys)->"FunctionalContext":
+        return self.set_state(False, *keys)
+
+    def enable(self, *keys)->"FunctionalContext":
+        return self.set_state(True, *keys)
 
     def clone(self)->"FunctionalContext":
         context = FunctionalContext()

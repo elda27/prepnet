@@ -24,9 +24,15 @@ class FixedStage:
             for context in self.stage_configurations
         ]
 
-    def disable(self):
+    def disable(self)->"FixedStage":
+        return self.set_state(False)
+
+    def enable(self)->"FixedStage":
+        return self.set_state(True)
+
+    def set_state(self, state:bool)->"FixedStage":
         stage = self.clone()
-        stage.enable = False
+        stage.enable = state
         return stage
 
     def clone(self):
