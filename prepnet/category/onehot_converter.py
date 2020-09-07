@@ -12,16 +12,21 @@ class OnehotConverter(FrameConverterBase):
             autocast (bool): Each columns are automatically cast to string type.
         """
         super().__init__()
+        self.autocast = autocast
         self.result_columns = None
 
     def encode(self, df:pd.DataFrame):
         self.original_columns = df.columns
         self.original_dtypes = df.dtypes
 
-        df = df.apply({
-            col: (lambda x: x) if dtype.kind == 'O' else (lambda x: x.astype(str))
-            for col, dtype in df.dtypes.items()
-        })
+        if self.autocast:
+            df = df.apply({
+                col: (lambda x: x) if dtype.kind == 'O' else (lambda x: x.astype(str))
+                for col, dtype in df.dtypes.items()
+            })
+        else:
+            assert all([dtype.kind == 'O' for dtype in df.dtypes.values()]), \
+                'Onehot encoding only support str columns'
 
         result = pd.get_dummies(df)
         
