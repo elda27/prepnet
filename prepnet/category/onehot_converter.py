@@ -5,10 +5,11 @@ import numpy as np
 
 
 class OnehotConverter(FrameConverterBase):
-    def __init__(self):
+    def __init__(self, autocast:bool=True):
         """Onehot encoding for categorical columns.
 
-        You cannot combined with the class derrived ColumnConverterBase
+        Args:
+            autocast (bool): Each columns are automatically cast to string type.
         """
         super().__init__()
         self.result_columns = None
@@ -16,6 +17,12 @@ class OnehotConverter(FrameConverterBase):
     def encode(self, df:pd.DataFrame):
         self.original_columns = df.columns
         self.original_dtypes = df.dtypes
+
+        df = df.apply({
+            col: lambda x: x if dtype.kind == 'O' else col:lambda x: x.astype(str)
+            for col, dtype in df.dtypes.items()
+        })
+
         result = pd.get_dummies(df)
         
         assert self.result_columns is None or (self.result_columns == df.columns).all()
