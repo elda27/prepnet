@@ -14,6 +14,7 @@ def test_functional_context():
         'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
         'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
         'col3': ['two', 'one', 'three', 'one', 'two', 'two'],
+        'col4': [0, 1, 0, 1, 2, 2],
     })
     expected_df = pd.DataFrame({
         'col1_one': [1, 1, 0, 0, 0, 1],
@@ -23,11 +24,14 @@ def test_functional_context():
         'col2_two': [1, 0, 1, 0, 0, 0],
         'col2_three': [0, 0, 0, 1, 0, 1],
         'col3': [0, 1, 2, 1, 0, 0],
+        'col4_0': [1, 0, 1, 0, 0, 0],
+        'col4_1': [0, 1, 0, 1, 0, 0],
+        'col4_2': [0, 0, 0, 0, 1, 1],
     }, dtype=np.uint8)
     
     context = FunctionalContext()
     with context.enter():
-        context['col1', 'col2'].onehot()
+        context['col1', 'col2', 'col4'].onehot()
         context['col3'].ordinal()
 
     output_df = context.encode(input_df)

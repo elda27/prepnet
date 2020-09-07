@@ -19,7 +19,7 @@ class OnehotConverter(FrameConverterBase):
         self.original_dtypes = df.dtypes
 
         df = df.apply({
-            col: lambda x: x if dtype.kind == 'O' else col:lambda x: x.astype(str)
+            col: (lambda x: x) if dtype.kind == 'O' else (lambda x: x.astype(str))
             for col, dtype in df.dtypes.items()
         })
 
@@ -35,6 +35,8 @@ class OnehotConverter(FrameConverterBase):
         for col in self.original_columns:
             filtered_columns = list(filter(lambda x: x.startswith(col), df.columns))
             reconstructed = df[filtered_columns].idxmax(axis=1)
-            result[col] =  reconstructed.apply(lambda x: x[len(col) + 1:])
-
+            series =  reconstructed.apply(lambda x: x[len(col) + 1:])
+            if series.dtype != self.original_dtypes[col]:
+                series = series.astype(self.original_dtypes[col])
+            result[col] = series
         return pd.DataFrame(result, index=df.index)
