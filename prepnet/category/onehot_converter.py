@@ -29,10 +29,14 @@ class OnehotConverter(FrameConverterBase):
                 'Onehot encoding only support str columns'
 
         result = pd.get_dummies(df)
-        
-        assert self.result_columns is None or (self.result_columns == df.columns).all()
-
-        self.result_columns = result.columns
+        if self.result_columns is not None:
+            reminder_columns = list(filter(
+                lambda x: x not in result.columns,
+                self.result_columns
+            ))
+            result[reminder_columns] = np.uint8(0)
+        else:
+            self.result_columns = result.columns
         return result
 
     def decode(self, df:pd.DataFrame):

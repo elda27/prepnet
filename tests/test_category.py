@@ -64,3 +64,41 @@ def test_onehot_converter():
     reconstruct_df = converter.decode(output_df)
     pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
 
+
+def test_onehot_converter_on_missing():
+    input_df = pd.DataFrame({
+        'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
+        'col2': ['two', 'one', 'two', 'three', 'one', 'three'],
+    })
+    input_df2 = pd.DataFrame({
+        'col1': ['one', 'one', 'two', 'three', 'three', 'one'],
+        'col2': ['one', 'one', 'one', 'three', 'one', 'three'],
+    })
+    expected_df = pd.DataFrame({
+        'col1_one': [1, 1, 0, 0, 0, 1],
+        'col1_two': [0, 0, 1, 0, 0, 0],
+        'col1_three': [0, 0, 0, 1, 1, 0],
+        'col2_one': [0, 1, 0, 0, 1, 0],
+        'col2_two': [1, 0, 1, 0, 0, 0],
+        'col2_three': [0, 0, 0, 1, 0, 1],
+    }, dtype=np.uint8)
+    expected_df2 = pd.DataFrame({
+        'col1_one': [1, 1, 0, 0, 0, 1],
+        'col1_two': [0, 0, 1, 0, 0, 0],
+        'col1_three': [0, 0, 0, 1, 1, 0],
+        'col2_one': [1, 1, 1, 0, 1, 0],
+        'col2_two': [0, 0, 0, 0, 0, 0],
+        'col2_three': [0, 0, 0, 1, 0, 1],
+    }, dtype=np.uint8)
+
+    converter = OnehotConverter()
+    output_df = converter.encode(input_df)
+    pd.testing.assert_frame_equal(expected_df, output_df[expected_df.columns])
+    output_df2 = converter.encode(input_df2)
+    pd.testing.assert_frame_equal(expected_df2, output_df2[expected_df2.columns])
+
+    reconstruct_df = converter.decode(output_df)
+    pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
+    reconstruct_df2 = converter.decode(output_df2)
+    pd.testing.assert_frame_equal(reconstruct_df2[input_df2.columns], input_df2)
+
