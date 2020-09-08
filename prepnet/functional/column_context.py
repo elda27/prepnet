@@ -56,7 +56,7 @@ class ColumnContext(ConfigurationContextBase):
         return self
 
     @copydoc(FillNA)
-    def fill_na(self, value=0.0, by=None):
+    def fillna(self, value=0.0, by=None):
         self.add_config(FillNA, value, by)
         return self
 
