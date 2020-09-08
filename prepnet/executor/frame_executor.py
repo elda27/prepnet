@@ -1,3 +1,4 @@
+from prepnet.core.config import get_config
 from prepnet.executor.executor_base import ExecutorBase
 from prepnet.core.frame_converter_base import FrameConverterBase
 from prepnet.executor.converter_array import ConverterArray
@@ -13,10 +14,20 @@ class FrameExecutor(ExecutorBase):
         self.result_columns = None
 
     def encode(self, df: pd.DataFrame):
-        if self.converters.columns is None:
+        if get_config('raise_satisfied'):
+            columns = self.converters.columns
+        elif self.converters.columns is None:
+            columns = None
+        else:
+            columns = list(filter(
+                lambda x: x in df.columns,
+                self.converters.columns
+            ))
+
+        if columns is None:
             in_df = df
         else:
-            in_df = df[self.converters.columns]
+            in_df = df[columns]
 
         if isinstance(in_df, DataFrameArray):
             out_df = in_df.apply(lambda x: SequenceConverter(self.converters).encode(in_df))
@@ -26,13 +37,13 @@ class FrameExecutor(ExecutorBase):
         # Modify columns
 
         self.result_columns = out_df.columns
-        if self.converters.columns is None:
+        if columns is None:
             # Modify index
             df = out_df
         else:
-            if (len(out_df.columns) != len(self.converters.columns) or 
-                    (out_df.columns != self.converters.columns).all()):
-                df = df.drop(columns=self.converters.columns)
+            if (len(out_df.columns) != len(columns) or 
+                    (out_df.columns != columns).all()):
+                df = df.drop(columns=columns)
             if (out_df.index == in_df.index).all():
                 df = df.assign(**{
                     col:series for col, series in out_df.items()
@@ -41,13 +52,23 @@ class FrameExecutor(ExecutorBase):
                 raise ValueError(
                     'Index is unmatched while column wise encoding.\n'
                     'If you want to modify the index, the columns should be None.\n'
-                    f'Columns: {self.converters.columns}, Converter: {self.converters}'
+                    f'Columns: {columns}, Converter: {self.converters}'
                 )
 
         return df
 
     def decode(self, df: pd.DataFrame):
-        if self.converters.columns is None:
+        if get_config('raise_satisfied'):
+            columns = self.converters.columns
+        elif self.converters.columns is None:
+            columns = None
+        else:
+            columns = list(filter(
+                lambda x: x in df.columns,
+                self.converters.columns
+            ))
+
+        if columns is None:
             in_df = df
         else:
             in_df = df[self.result_columns]
@@ -58,7 +79,7 @@ class FrameExecutor(ExecutorBase):
         else:
             out_df = SequenceConverter(self.converters).decode(in_df)
 
-        if self.converters.columns is None:
+        if columns is None:
             df = out_df
         else:
             df = pd.concat([df, out_df], axis=1)

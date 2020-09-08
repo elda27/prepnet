@@ -3,6 +3,7 @@ from copy import deepcopy
 
 import pandas as pd
 
+from prepnet.core.config import get_config
 from prepnet.executor.executor_base import ExecutorBase
 from prepnet.core.column_converter_base import ColumnConverterBase
 from prepnet.core.sequence_converter import SequenceConverter
@@ -22,6 +23,8 @@ class ColumnExecutor(ExecutorBase):
     def encode(self, df: pd.DataFrame):
         results = {}
         for col, converter in self.converters.items():
+            if not get_config('raise_satisfied') and col not in df.columns:
+                continue
             results[col] = converter.encode(df[col])
         df = df.assign(**results)
         return df
@@ -29,6 +32,8 @@ class ColumnExecutor(ExecutorBase):
     def decode(self, df: pd.DataFrame):
         results = {}
         for col, converter in self.converters.items():
+            if not get_config('raise_satisfied') and col not in df.columns:
+                continue
             results[col] = converter.decode(df[col])
         df = df.assign(**results)
         return df
