@@ -43,6 +43,9 @@ class OnehotConverter(FrameConverterBase):
         result = {}
         for col in self.original_columns:
             filtered_columns = list(filter(lambda x: x.startswith(col), df.columns))
+            if not get_config('raise_satisfied') and len(filtered_columns) == 0:
+                break
+
             reconstructed = df[filtered_columns].idxmax(axis=1)
             series =  reconstructed.apply(lambda x: x[len(col) + 1:])
             if series.dtype != self.original_dtypes[col]:

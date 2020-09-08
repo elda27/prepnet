@@ -75,7 +75,9 @@ class FrameExecutor(ExecutorBase):
             df = df.drop(columns=columns)
 
         if isinstance(in_df, DataFrameArray):
-            out_df = in_df.apply(lambda x: SequenceConverter(self.converters).decode(x))
+            out_df = in_df.apply(
+                lambda x: SequenceConverter(self.converters).decode(x)
+            )
         else:
             out_df = SequenceConverter(self.converters).decode(in_df)
 
