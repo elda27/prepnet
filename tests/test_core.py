@@ -2,6 +2,8 @@ import pytest
 import pandas as pd
 import numpy as np
 
+from prepnet.core.config import set_config, get_config, config_context
+
 from prepnet.executor.executor import Executor
 
 from prepnet.executor.converter_array import ConverterArray
@@ -9,6 +11,15 @@ from prepnet.core.null_converter import NullConverter
 from prepnet.core.sequence_converter import SequenceConverter
 from prepnet.category.ordinal_converter import OrdinalConverter
 from prepnet.category.onehot_converter import OnehotConverter
+
+def test_config():
+    assert get_config('raise_satisfied') == True
+    set_config('raise_satisfied', False)
+    assert get_config('raise_satisfied') == False
+    with config_context('raise_satisfied', True):
+        assert get_config('raise_satisfied') == True
+    assert get_config('raise_satisfied') == False
+    set_config('raise_satisfied', True)
 
 def test_executor():
     input_df = pd.DataFrame({
@@ -57,4 +68,5 @@ def test_sequence_converter():
     reconstruct_series = converter.decode(output_series)
 
     pd.testing.assert_series_equal(input_series, reconstruct_series)
+
 

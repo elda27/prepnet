@@ -142,12 +142,21 @@ def test_safe_satisfied():
         context['col1', 'col2', 'col4'].onehot()
         context['col3'].ordinal()
 
+    with pytest.raises(KeyError):
+        output_df = context.encode(input_df)
     with config_context('raise_satisfied', False):
         output_df = context.encode(input_df)
-        pd.testing.assert_frame_equal(
-            expected_df.astype(np.uint8), 
-            output_df[expected_df.columns].astype(np.uint8)
-        )
 
+    pd.testing.assert_frame_equal(
+        expected_df.astype(np.uint8), 
+        output_df[expected_df.columns].astype(np.uint8)
+    )
+
+    del output_df['col3']
+    del input_df['col3']
+
+    with pytest.raises(KeyError):
         reconstruct_df = context.decode(output_df)
-        pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)
+    with config_context('raise_satisfied', False):
+        reconstruct_df = context.decode(output_df)
+    pd.testing.assert_frame_equal(reconstruct_df[input_df.columns], input_df)

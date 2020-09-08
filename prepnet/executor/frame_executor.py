@@ -59,27 +59,27 @@ class FrameExecutor(ExecutorBase):
 
     def decode(self, df: pd.DataFrame):
         if get_config('raise_satisfied'):
-            columns = self.converters.columns
+            columns = self.result_columns
         elif self.converters.columns is None:
             columns = None
         else:
             columns = list(filter(
                 lambda x: x in df.columns,
-                self.converters.columns
+                self.result_columns
             ))
 
         if columns is None:
             in_df = df
         else:
-            in_df = df[self.result_columns]
-            df = df.drop(columns=self.result_columns)
+            in_df = df[columns]
+            df = df.drop(columns=columns)
 
         if isinstance(in_df, DataFrameArray):
             out_df = in_df.apply(lambda x: SequenceConverter(self.converters).decode(x))
         else:
             out_df = SequenceConverter(self.converters).decode(in_df)
 
-        if columns is None:
+        if self.converters.columns is None:
             df = out_df
         else:
             df = pd.concat([df, out_df], axis=1)
